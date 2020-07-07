@@ -13,7 +13,6 @@ listt = [
         (700, 550, 850, 600, 500, 300, 250, 300, 200)
         ]
 
-cur_cli = []
 
 def recv_msg(sock):
     data = bytearray()
@@ -36,7 +35,7 @@ def send_msg(sock,msg):
 def converse(sock,addr):
     while True:
         msg = recv_msg(sock)
-        print('{}: {}'.fromat(addr, msg))
+        print('{}: {}'.format(addr, msg))
         print()
         if msg in listt[0]:
             send_msg(sock,'Confirmed Payment(y/n)')
@@ -55,21 +54,17 @@ def converse(sock,addr):
             converse(sock, addr)
 
 def handle_client(sock, addr):
-    if addr in cur_cli:
-        pass
-    else:
-        cur_cli.append(addr)
-        send_msg(sock,"Welcome to Coffee Shop!")
-        send_msg(sock,'What do you want to buy')
-        send_msg(sock,'Enter order name as listed')
-        send_msg(sock,"")
-        for i in range(9):
-            send_msg(sock,listt[0][i],'\t',listt[1][i])
+    send_msg(sock,"Welcome to Coffee Shop!")
+    send_msg(sock,'What do you want to buy')
+    send_msg(sock,'Enter order name as listed')
+    send_msg(sock,"")
+    for i in range(9):
+        msg = listt[0][i]+'\t'+str(listt[1][i])
+        send_msg(sock,msg)
     try:
         converse(sock,addr)
     except (ConnectionError, BrokenPipeError):
         print('Socket Error')
     finally:
         print('Closed connection to {}'.format(addr))
-        cur_cli.remove(addr)
         sock.close()

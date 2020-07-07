@@ -1,11 +1,11 @@
 #!usr/bin/python
 # Author:   @BlankGodd_
 
-import server
+import mod
 import sys, socket
 
 HOST = sys.argv[-1] if len(sys.argv) > 1 else '127.0.0.1'
-PORT = server.PORT
+PORT = 4200
 
 if __name__ == '__main__':
     while True:
@@ -20,11 +20,12 @@ if __name__ == '__main__':
             while recvd != 'c4':
                 msg = input(': ')
                 if msg == 'q': break
-                server.send_msg(sock,msg)
+                mod.send_msg(sock,msg)
                 for i in range(3):
                     try:
-                        recvd = server.recv_msg(sock)
+                        recvd = mod.recv_msg(sock)
                         print(recvd)
+                        print()
                     except:
                         pass        
                 if recvd == 'c4':

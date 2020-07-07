@@ -1,0 +1,1 @@
+[('caffe americano', 'cafe latte', 'cappuccino', 'espresso', 'long black', 'cupcakes', 'doughnuts', 'scones', 'cookies'), (700, 550, 850, 600, 500, 300, 250, 300, 200)]

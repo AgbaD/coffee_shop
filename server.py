@@ -2,7 +2,7 @@
 # Author:   @BlankGodd_
 
 import select
-import tincanchat
+import mod
 from types import SimpleNamespace
 from collections import deque
 
@@ -16,13 +16,13 @@ def create_client(sock):
                            send_queue=deque())
 
 def broadcast_msg(msg):
-    data = tincanchat.prep_msg(msg)
+    data = mod.prep_msg(msg)
     for client in clients.values():
         client.send_queue.append(data)
         poll.register(client.sock, select.POLLOUT)
 
 if __name__ == '__main__':
-    listen_sock = tincanchat.create_listen_socket(HOST, PORT)
+    listen_sock = mod.create_listen_socket(HOST, PORT)
     poll = select.poll()
     poll.register(listen_sock, select.POLLIN)
     addr = listen_sock.getsockname()
@@ -52,7 +52,7 @@ if __name__ == '__main__':
                     print('Client {} disconnected'.format(addr))
                     continue
                 data = client.rest + recvd
-                (msgs, client.rest) = tincanchat.parse_recvd_data(data)
+                (msgs, client.rest) = mod.parse_recvd_data(data)
                 for msg in msgs:
                     msg = '{}: {}'.format(addr, msg)
                     print(msg)

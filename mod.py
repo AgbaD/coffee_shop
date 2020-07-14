@@ -2,17 +2,16 @@
 # Author:   @BlankGodd_
 
 import socket
-import ast
-import threading
 
-listt = [
-        ('caffe americano', 'cafe latte', 'cappuccino', 
-        'espresso', 'long black', 'cupcakes', 'doughnuts', 
-        'scones', 'cookies'), 
-        
-        (700, 550, 850, 600, 500, 300, 250, 300, 200)
-        ]
+HOST = ''
+PORT = 4040
 
+def create_listen_socket(host, port):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.bind((host, port))
+    sock.listen(100)
+    return sock
 
 def recv_msg(sock):
     data = bytearray()
@@ -25,46 +24,30 @@ def recv_msg(sock):
         if b'\0' in recvd:
             msg = data.rstrip(b'\0')
     msg = msg.decode('utf-8')
-    return msg.lower()
+    return msg
 
-def send_msg(sock,msg):
+def prep_msg(msg):
     msg += '\0'
-    data = msg.encode('utf-8')
+    return msg.encode('utf-8')
+
+def send_msg(sock, msg):
+    data = prep_msg(msg)
     sock.sendall(data)
 
-def converse(sock,addr):
-    while True:
-        msg = recv_msg(sock)
-        print('{}: {}'.format(addr, msg))
-        print()
-        if msg in listt[0]:
-            send_msg(sock,'Confirmed Payment(y/n)')
-            conf = recv_msg(sock)
-            if conf == 'y':
-                send_msg(sock,'Payment Confirmed')
-                send_msg(sock,'Order Complete')
-                send_msg(sock, 'c4')
-                break
-            else:
-                send_msg(sock,'Order Canceled')
-                break
-        else:
-            send_msg(sock,'Order not recognised')
-            send_msg(sock,'Place new order')
-            converse(sock, addr)
+def parse_recvd_data(data):
+    parts = data.split(b'\0')
+    msgs = parts[:-1]
+    rest = parts[-1]
+    return (msgs, rest)
 
-def handle_client(sock, addr):
-    send_msg(sock,"Welcome to Coffee Shop!")
-    send_msg(sock,'What do you want to buy')
-    send_msg(sock,'Enter order name as listed')
-    send_msg(sock,"")
-    for i in range(9):
-        msg = listt[0][i]+'\t'+str(listt[1][i])
-        send_msg(sock,msg)
-    try:
-        converse(sock,addr)
-    except (ConnectionError, BrokenPipeError):
-        print('Socket Error')
-    finally:
-        print('Closed connection to {}'.format(addr))
-        sock.close()
+def recv_msgs(sock, data=bytes()):
+    msgs = []
+    while not msgs:
+        recvd = sock.recv(4096)
+        if not recvd:
+            raise ConnectionError()
+        data = data + recvd
+        (msgs, rest) = parse_recvd_data(data)
+    msgs = [msg.decode('utf-8') for msg in msgs]
+    return (msgs, rest)
+
